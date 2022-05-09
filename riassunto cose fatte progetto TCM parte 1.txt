@@ -1,0 +1,86 @@
+bucket -> creato come visto a lezione. 
+
+API gateway -> creati due gateway di prova con i due ruoli disponibili (robomaker_students e LabRole).
+			 Seguita procedura di creazione vista in aula.			 
+
+
+IAM -> a entrambi i ruoli sono stati aggiunti i permessi completi di S3.
+
+Lambda -> lambda scritta in python che fa le stesse cose viste in aula.
+
+Postman -> passa file raw via post a URL gateway/lambda. 
+		  	con il codice come scritto sotto FUNGEEEE!!
+		 
+		 
+
+
+codice python usato (uguale a quello in classe):
+
+import boto3
+import uuid 
+import json
+
+
+def lambda_handler(event, context):
+    content = event["body"]
+    encoded_string = content.encode("utf-8")
+    
+    bucket_name = "xmlresultd"
+    file_name = "gara.txt"
+    s3_path = "test/" + file_name
+    
+    s3 = boto3.resource("s3")
+    s3.Bucket(bucket_name).put_object(Key=s3_path, Body=encoded_string)
+    
+    return {
+        'statusCode': 200,
+        'body': event["body"]
+    }   
+
+
+
+AGGIORNATO CON FILE CHE HA NOME IN BASE ALLA DATA IN MODO TALE DA AVERE FILE DIVERSI OGNI VOLTA
+CHE SI HA UN UPLOAD.
+
+--------------------------------------------
+
+Ora si lavora per fare parsing del file caricato. Ho caricato un file "gara.xml" nel bucket
+senza metterlo in nessuna cartella per semplicità.
+
+lambda usata:
+
+import json
+from xml.dom import minidom
+import boto3
+import array as arr 
+
+s3 = boto3.resource('s3')
+
+def lambda_handler(event, context):
+   bucketname = 'xmlresultd' 
+   filename = 'gara.xml'  #"gara" + datarichiestadautente + ".xml"
+   obj = s3.Object(bucketname, filename)
+   file_data = obj.get()['Body'].read()
+  
+   #parse xml
+   xmldoc = minidom.parseString(file_data)
+   message_1 = xmldoc.getElementsByTagName('Class')[0].getElementsByTagName('Name')
+    #a = arr.array('i', ["begin", "start", "prova"])
+   n = len(message_1)
+   a = []
+   for i in range (0,n):
+      a.append(message_1.item(i).firstChild.data)
+      
+   #x = print(a)
+   #return
+   return {
+      "bucketname": bucketname,
+      #"file_data": file_data,
+      "id": a
+   }
+
+IMPO: obv questa fa riferimento a un altro API gateway perché serve per le get e non per le post
+
+ORA IL PROBLEMA E': è possibile avere user input su una lambda? Xk se sì basta avere input da utente
+per trovare il file giusto (input aka una nuova lambda che reagisce a una HTTP POST e prende i parametri
+e li riversa nella lambda ^ per ottenere il file giusto)

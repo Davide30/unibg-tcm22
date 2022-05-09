@@ -1,0 +1,41 @@
+import uuid 
+import boto3
+import json
+
+def lambda_handler(event, context):
+    
+    dynamodb = boto3.resource('dynamodb')
+    client = boto3.client('dynamodb')
+    table = dynamodb.Table('gareg')
+    data = table.scan()
+    # data_clean = data['Items'][]
+
+    data_id = []
+    data_name = []
+    data_date = []
+    data_place = []
+    
+    for i in data['Items']:
+        data_id.append(i['race_id'])
+        data_name.append(i['race_name'])
+        data_date.append(i['race_date'])
+        data_place.append(i['race_place'])
+        
+    data_clean = (data_id, data_name, data_date, data_place)
+    
+    """
+    for i in range(0, len(data['Items'])):
+        data_id[i]=data['Items'][i]['race_id']
+        data_name[i]=data['Items'][i]['race_name']
+        data_date[i]=data['Items'][i]['race_date']
+        data_place[i]=data['Items'][i]['race_place']
+        
+    
+    # loads("[{},{},{},{}]".format(dumps(data_id), dumps(data_name), dumps(data_date), dumps(data_place)))
+    """
+    return {
+        'statusCode': 200,
+        'body': json.dumps(data_clean)
+        # 'body': json.loads("[{},{},{},{}]".format(dumps(data_id), dumps(data_name), dumps(data_date), dumps(data_place)))
+        # 'body': json.dumps('Hello from Lambda!')
+    }

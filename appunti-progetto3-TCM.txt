@@ -1,0 +1,6 @@
+nuovo endpoint /list_races per restituire una lista degli eventi (lista con nome-id-, luogo e data)
+meglio ritornare cose in json/html (meglio maybe json che lavora meglio con flutter che useremo più
+avanti). MAYBE fare direttamente cose con flutter che dovrebbe fare le stesse cose.
+
+potrebbe anche essere utile settare una lambda che al posto di rimandare l'intero xml ogni volta 
+mandi il diff tra xml attuale e quello vecchio (ossia mandi solo gli updates).

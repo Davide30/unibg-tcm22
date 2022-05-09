@@ -1,0 +1,55 @@
+import boto3
+import json
+import string
+import random
+import uuid
+from boto3.dynamodb.conditions import Key, Attr
+
+def id_generator(size=9, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
+
+def lambda_handler(event, context):
+    
+    content = event["body"]
+    # id = event["queryStringParameters"]["id"]
+    race_name = event["queryStringParameters"]["race_name"]
+    race_date = event["queryStringParameters"]["race_date"]
+    email = event["queryStringParameters"]["email"]
+    race_place = event["queryStringParameters"]["race_place"]
+    race_id = str(uuid.uuid4())
+    token = id_generator();
+    
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table('gareg')
+    # maxvalue = table.item_count+1
+    # response = table.scan()
+    # response = response['Items']
+    # mystring = ''.join(map(str, list))
+    # values = list(table.query(reverse=True, limit=1))
+    # maxvalue = response[0][]
+
+    # kce = Key('gareg')
+    # output = table.query(KeyConditionExpression = kce, ScanIndexForward = False, Limit = 1) 
+    
+    # encoded_string = content.encode("utf-8")
+    # bucket_name = "xmlresultg"
+    # file_name = "gara"+id+".xml"
+    # s3_path = file_name
+    # s3 = boto3.resource("s3")
+    # s3.Bucket(bucket_name).put_object(Key=s3_path, Body=encoded_string)
+    
+    # this will create dynamodb resource object and
+    # here dynamodb is resource name
+    
+    # this will search for dynamoDB table 
+    # your table name may be different
+    # print(table.table_status)
+
+    table.put_item(Item= {'race_id': race_id, 'race_name': race_name, 'race_date': race_date, 'email': email, 
+    'race_place': race_place, 'token': token })
+    
+    return {
+        'statusCode': 200,
+        'body': json.dumps('upload successful, token = ' + token + ', race_id = ' + race_id)
+        # + 'token =' + token + 'ID_gara = ' + maxvalue 
+    }

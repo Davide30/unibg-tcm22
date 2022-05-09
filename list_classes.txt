@@ -1,0 +1,37 @@
+import json
+import uuid
+from xml.dom import minidom
+import boto3
+import xml.etree.ElementTree as ET
+
+s3 = boto3.resource('s3')
+
+def lambda_handler(event, context):
+
+   bucketname = 'xmlresultg' 
+   race_id = event["queryStringParameters"]["race_id"]
+   
+   filename = "gara" + race_id  + ".xml"
+   obj = s3.Object(bucketname, filename)
+   file_data = obj.get()['Body'].read()
+  
+   """
+   #parse xml
+   xmldoc = minidom.parseString(file_data)
+   message_1 = xmldoc.getElementsByTagName('Class')[0].getElementsByTagName('Name')
+   n = len(message_1)
+   a = []
+   for i in range (0,n):
+      a.append(message_1.item(i).firstChild.data)
+   """
+   
+   root = ET.fromstring(file_data)
+   _ns = {'':'http://www.orienteering.org/datastandard/3.0'}
+   class_names_elements = root.findall('./ClassResult/Class/Name', _ns)
+   classes = [x.text for x in class_names_elements]
+      
+   return {
+      'statusCode': 200,
+      "bucketname": bucketname,
+      'body': json.dumps(classes)
+   }
